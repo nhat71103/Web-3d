@@ -1,0 +1,21 @@
+# .htaccess đơn giản cho 3D Animal Showcase
+
+# MIME types cho 3D models
+AddType model/gltf-binary .glb
+AddType model/gltf+json .gltf
+AddType application/octet-stream .obj
+AddType application/octet-stream .fbx
+
+# CORS headers cho static files (3D models, images)
+<FilesMatch "\.(glb|gltf|obj|fbx|png|jpg|jpeg|gif|webp)$">
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Content-Type, Accept, Origin, X-Requested-With"
+    Header always set Access-Control-Max-Age "86400"
+</FilesMatch>
+
+# Handle API requests
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ api/index.php?path=$1 [QSA,L]

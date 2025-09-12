@@ -1,0 +1,396 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS để xử lý ảnh có nền trắng - mức bình thường */
+.animal-card img {
+  mix-blend-mode: multiply !important;
+  filter: contrast(1.1) brightness(1.05) saturate(1.1) !important;
+  background-color: transparent !important;
+  isolation: isolate !important;
+}
+
+.animal-card img:hover {
+  filter: contrast(1.15) brightness(1.08) saturate(1.15) !important;
+  transform: scale(1.02) rotate(0.5deg) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Xử lý ảnh PNG có nền trắng */
+.animal-card img[src*=".png"] {
+  mix-blend-mode: multiply !important;
+  filter: contrast(1.1) brightness(1.05) saturate(1.1) !important;
+}
+
+/* Xử lý ảnh JPG/JPEG */
+.animal-card img[src*=".jpg"],
+.animal-card img[src*=".jpeg"] {
+  mix-blend-mode: multiply !important;
+  filter: contrast(1.08) brightness(1.03) saturate(1.08) !important;
+}
+
+/* CSS đặc biệt để loại bỏ nền trắng - mức nhẹ nhàng */
+.animal-card img[src*="Hổ"],
+.animal-card img[src*="Tiger"],
+.animal-card img[src*="tiger"] {
+  mix-blend-mode: multiply !important;
+  filter: contrast(1.15) brightness(1.08) saturate(1.15) !important;
+  background-color: transparent !important;
+  isolation: isolate !important;
+}
+
+/* Custom Animations */
+@keyframes gradient-xy {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes gradient-x {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-up-delay-1 {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-up-delay-2 {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-up-delay-3 {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-up-delay-6 {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-up-delay-7 {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-up-delay-8 {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-up-delay-9 {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-up-delay-10 {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradient-text {
+  0%, 100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+
+/* Animation Classes */
+.animate-gradient-xy {
+  animation: gradient-xy 15s ease infinite;
+  background-size: 400% 400%;
+}
+
+.animate-gradient-x {
+  animation: gradient-x 3s ease infinite;
+  background-size: 200% 200%;
+}
+
+.animate-fade-in {
+  animation: fade-in 1s ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out;
+}
+
+.animate-fade-in-delay-1 {
+  animation: fade-in-up-delay-1 0.8s ease-out 0.2s both;
+}
+
+.animate-fade-in-delay-2 {
+  animation: fade-in-up-delay-2 0.8s ease-out 0.4s both;
+}
+
+.animate-fade-in-delay-3 {
+  animation: fade-in-up-delay-3 0.8s ease-out 0.6s both;
+}
+
+.animate-fade-in-delay-6 {
+  animation: fade-in-up-delay-6 0.8s ease-out 1.2s both;
+}
+
+.animate-fade-in-delay-7 {
+  animation: fade-in-up-delay-7 0.8s ease-out 1.4s both;
+}
+
+.animate-fade-in-delay-8 {
+  animation: fade-in-up-delay-8 0.8s ease-out 1.6s both;
+}
+
+.animate-fade-in-delay-9 {
+  animation: fade-in-up-delay-9 0.8s ease-out 1.8s both;
+}
+
+.animate-fade-in-delay-10 {
+  animation: fade-in-up-delay-10 0.8s ease-out 2s both;
+}
+
+.animate-gradient-text {
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7);
+  background-size: 300% 300%;
+  animation: gradient-text 3s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Floating Particles */
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+.particle-1 {
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.particle-2 {
+  top: 60%;
+  left: 20%;
+  animation-delay: 1s;
+}
+
+.particle-3 {
+  top: 40%;
+  left: 80%;
+  animation-delay: 2s;
+}
+
+.particle-4 {
+  top: 80%;
+  left: 70%;
+  animation-delay: 3s;
+}
+
+.particle-5 {
+  top: 30%;
+  left: 50%;
+  animation-delay: 4s;
+}
+
+.particle-6 {
+  top: 70%;
+  left: 30%;
+  animation-delay: 5s;
+}
+
+.particle-7 {
+  top: 10%;
+  left: 60%;
+  animation-delay: 1.5s;
+}
+
+.particle-8 {
+  top: 90%;
+  left: 40%;
+  animation-delay: 2.5s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.5;
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-10px) translateX(-10px);
+    opacity: 0.3;
+  }
+  75% {
+    transform: translateY(-30px) translateX(5px);
+    opacity: 0.6;
+  }
+}
+
+/* Search Glow Effect */
+.search-glow:focus {
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
+}
+
+/* Line Clamp */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Hover Effects */
+.hover\:scale-110:hover {
+  transform: scale(1.1);
+}
+
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+}
+
+.hover\:-translate-y-3:hover {
+  transform: translateY(-12px);
+}
+
+.hover\:translate-x-1:hover {
+  transform: translateX(4px);
+}
+
+.hover\:rotate-12:hover {
+  transform: rotate(12deg);
+}
+
+/* Backdrop Filter Support */
+@supports (backdrop-filter: blur(10px)) {
+  .backdrop-blur-lg {
+    backdrop-filter: blur(16px);
+  }
+  
+  .backdrop-blur-md {
+    backdrop-filter: blur(12px);
+  }
+  
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .animate-fade-in-up-delay-3,
+  .animate-fade-in-up-delay-6,
+  .animate-fade-in-up-delay-7,
+  .animate-fade-in-up-delay-8,
+  .animate-fade-in-up-delay-9,
+  .animate-fade-in-up-delay-10 {
+    animation-delay: 0s !important;
+  }
+}
+

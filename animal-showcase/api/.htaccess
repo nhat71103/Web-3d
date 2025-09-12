@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# Redirect /api/edit/ID to edit.php
+RewriteRule ^edit/([0-9]+)/?$ edit.php [L,QSA]
+
+# Redirect /api/add to add_animal.php (if needed)
+RewriteRule ^add/?$ ../add_animal.php [L,QSA]
+
+# Redirect /api/animals to animals_api_simple.php
+RewriteRule ^animals/?$ ../animals_api_simple.php [L,QSA]

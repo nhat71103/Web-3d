@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Model Viewer - Animal Showcase</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            overflow: hidden;
+        }
+
+        #header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .animal-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .animal-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .animal-details h1 {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .animal-details p {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .animal-meta {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .meta-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .habitat-badge {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .conservation-badge {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        #viewer-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2000;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 2rem;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #instructions {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .instruction-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 1rem;
+        }
+
+        #error {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2000;
+            background: rgba(220, 38, 38, 0.9);
+            color: white;
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .error-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .retry-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: white;
+            color: #dc2626;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div id="header">
+        <div class="animal-info">
+            <div class="animal-icon">🦁</div>
+                    <div class="animal-details">
+            <h1 id="animal-name">Loading...</h1>
+            <p id="animal-species">Loading...</p>
+            <div class="animal-meta">
+                <span id="habitat-type" class="meta-badge habitat-badge">Loading...</span>
+                <span id="conservation-status" class="meta-badge conservation-badge">Loading...</span>
+            </div>
+        </div>
+        </div>
+        <div class="controls">
+            <button class="btn btn-secondary" onclick="window.close()">
+                ✕ Đóng
+            </button>
+            <a href="#" class="btn btn-primary" id="download-btn" download>
+                📥 Tải xuống
+            </a>
+        </div>
+    </div>
+
+    <!-- 3D Viewer Container -->
+    <div id="viewer-container"></div>
+
+    <!-- Loading Screen -->
+    <div id="loading">
+        <div class="spinner"></div>
+        <h2>Đang tải 3D Model...</h2>
+        <p>Vui lòng đợi trong giây lát</p>
+    </div>
+
+    <!-- Instructions -->
+    <div id="instructions">
+        <div class="instruction-item">
+            <span>🖱️</span>
+            <span>Xoay chuột</span>
+        </div>
+        <div class="instruction-item">
+            <span>🔍</span>
+            <span>Cuộn zoom</span>
+        </div>
+        <div class="instruction-item">
+            <span>⌨️</span>
+            <span>WASD di chuyển, QE lên/xuống</span>
+        </div>
+    </div>
+
+    <!-- Error Display -->
+    <div id="error" style="display: none;">
+        <div class="error-icon">❌</div>
+        <h2>Lỗi tải 3D Model</h2>
+        <p id="error-message">Không thể tải 3D model. Vui lòng thử lại.</p>
+        <button class="retry-btn" onclick="retryLoad()">🔄 Thử lại</button>
+    </div>
+
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const animalId = urlParams.get('id');
+        const animalName = urlParams.get('name');
+        const animalSpecies = urlParams.get('species');
+        const modelPath = urlParams.get('model');
+
+        // Debug logging
+        console.log('🔍 URL Parameters:', {
+            animalId,
+            animalName,
+            animalSpecies,
+            modelPath
+        });
+
+        // Update UI
+        document.getElementById('animal-name').textContent = decodeURIComponent(animalName || 'Unknown');
+        document.getElementById('animal-species').textContent = decodeURIComponent(animalSpecies || 'Unknown');
+        // Download trực tiếp file .glb
+        document.getElementById('download-btn').href = `http://localhost/3d_web/animal-showcase/${modelPath}`;
+        
+        // Fetch animal details from API
+        if (animalId) {
+            fetch(`http://localhost/3d_web/animal-showcase/animals_api_simple.php`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data) {
+                        const animal = data.data.find(a => a.id == animalId);
+                        if (animal) {
+                            // Map habitat names to Vietnamese
+                            const habitatMapping = {
+                                'Rừng nhiệt đới': 'Trên cạn',
+                                'Savanna': 'Dưới biển', 
+                                'Rừng taiga': 'Trên trời',
+                                'Sa mạc': 'Trên cạn',
+                                'Đồng cỏ': 'Trên cạn'
+                            };
+                            
+                            // Map conservation status to Vietnamese
+                            const statusMapping = {
+                                'Least Concern': 'Ít quan ngại',
+                                'Near Threatened': 'Gần bị đe dọa',
+                                'Vulnerable': 'Dễ bị tổn thương',
+                                'Endangered': 'Nguy cấp',
+                                'Critically Endangered': 'Cực kỳ nguy cấp',
+                                'Extinct': 'Đã tuyệt chủng'
+                            };
+                            
+                            // Update habitat type and conservation status with Vietnamese translations
+                            const habitatDisplay = habitatMapping[animal.habitat_name] || animal.habitat_name || 'Không xác định';
+                            const statusDisplay = statusMapping[animal.conservation_status] || animal.conservation_status || 'Không xác định';
+                            
+                            document.getElementById('habitat-type').textContent = habitatDisplay;
+                            document.getElementById('conservation-status').textContent = statusDisplay;
+                            
+                            // Apply special styling for extinct status
+                            const conservationBadge = document.getElementById('conservation-status');
+                            if (statusDisplay === 'Đã tuyệt chủng') {
+                                conservationBadge.style.background = '#f3f4f6';
+                                conservationBadge.style.color = '#374151';
+                                conservationBadge.style.border = '1px solid #d1d5db';
+                            }
+                            
+                            // Update icon based on habitat
+                            const iconElement = document.querySelector('.animal-icon');
+                            if (habitatDisplay === 'Dưới biển') {
+                                iconElement.textContent = '🐬';
+                            } else if (habitatDisplay === 'Trên trời') {
+                                iconElement.textContent = '🦅';
+                            } else {
+                                iconElement.textContent = '🦁';
+                            }
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching animal details:', error);
+                });
+        }
+
+        // Three.js variables
+        let scene, camera, renderer, controls, model;
+        let animationId;
+        let keys = {};
+        const moveSpeed = 0.1;
+
+        // Initialize 3D scene
+        function init() {
+            console.log('🚀 Khởi tạo 3D viewer...');
+            console.log('📋 Thông tin model:', {
+                animalId,
+                animalName,
+                animalSpecies,
+                modelPath
+            });
+            
+            if (!modelPath) {
+                showError('Không có đường dẫn model 3D');
+                return;
+            }
+
+            const container = document.getElementById('viewer-container');
+            
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a1a);
+
+            // Create camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 0, 5);
+
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 10, 5);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+
+            // Add controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 1.0;
+
+            // WASD movement controls
+            document.addEventListener('keydown', (event) => {
+                keys[event.code] = true;
+            });
+            
+            document.addEventListener('keyup', (event) => {
+                keys[event.code] = false;
+            });
+
+            // Load 3D model
+            loadModel();
+
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+
+            // Start animation loop
+            animate();
+        }
+
+        // Load 3D model
+        function loadModel() {
+            if (!modelPath) {
+                showError('Không có đường dẫn model 3D');
+                return;
+            }
+
+            const loader = new THREE.GLTFLoader();
+            // Load trực tiếp file .glb
+            const fullModelPath = `http://localhost/3d_web/animal-showcase/${modelPath}`;
+            
+            console.log('🔍 Đang tải model từ:', fullModelPath);
+            console.log('📁 Đường dẫn gốc:', modelPath);
+
+            loader.load(
+                fullModelPath,
+                (gltf) => {
+                    model = gltf.scene;
+                    
+                    // Calculate bounding box
+                    const box = new THREE.Box3().setFromObject(model);
+                    const size = box.getSize(new THREE.Vector3());
+                    const center = box.getCenter(new THREE.Vector3());
+                    
+                    // Scale model to fit view
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    const scale = 4 / maxDim;
+                    model.scale.setScalar(scale);
+                    
+                    // Center model
+                    model.position.sub(center.multiplyScalar(scale));
+                    
+                    // Add shadows
+                    model.traverse((child) => {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                        }
+                    });
+                    
+                    scene.add(model);
+                    
+                    // Adjust camera to fit model
+                    const distance = maxDim * 2;
+                    camera.position.set(distance, distance, distance);
+                    camera.lookAt(0, 0, 0);
+                    controls.target.set(0, 0, 0);
+                    
+                    // Hide loading screen
+                    document.getElementById('loading').style.display = 'none';
+                    
+                    console.log('✅ 3D model loaded successfully');
+                },
+                (progress) => {
+                    const percent = Math.round((progress.loaded / progress.total) * 100);
+                    console.log(`Loading progress: ${percent}%`);
+                },
+                (error) => {
+                    console.error('❌ Error loading 3D model:', error);
+                    console.error('🔍 Model path:', modelPath);
+                    console.error('🔍 Full URL:', fullModelPath);
+                    
+                    let errorMessage = 'Lỗi tải 3D model';
+                    if (error.message) {
+                        errorMessage += ': ' + error.message;
+                    }
+                    if (error.target && error.target.status) {
+                        errorMessage += ' (HTTP ' + error.target.status + ')';
+                    }
+                    
+                    // Thêm thông tin chi tiết về lỗi
+                    if (error.target && error.target.status === 404) {
+                        errorMessage += '\n\nFile không tồn tại hoặc đường dẫn sai.';
+                        errorMessage += '\nĐường dẫn: ' + modelPath;
+                        errorMessage += '\nURL đầy đủ: ' + fullModelPath;
+                    }
+                    
+                    showError(errorMessage);
+                }
+            );
+        }
+
+        // Update camera position based on WASD keys
+        function updateCameraPosition() {
+            if (keys['KeyW']) {
+                camera.position.z -= moveSpeed;
+            }
+            if (keys['KeyS']) {
+                camera.position.z += moveSpeed;
+            }
+            if (keys['KeyA']) {
+                camera.position.x -= moveSpeed;
+            }
+            if (keys['KeyD']) {
+                camera.position.x += moveSpeed;
+            }
+            if (keys['KeyQ']) {
+                camera.position.y += moveSpeed;
+            }
+            if (keys['KeyE']) {
+                camera.position.y -= moveSpeed;
+            }
+        }
+
+        // Animation loop
+        function animate() {
+            animationId = requestAnimationFrame(animate);
+            
+            // Update WASD movement
+            updateCameraPosition();
+            
+            if (controls) controls.update();
+            if (renderer) renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Show error
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error-message').textContent = message;
+        }
+
+        // Retry loading
+        function retryLoad() {
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            loadModel();
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', init);
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            if (renderer) {
+                renderer.dispose();
+            }
+        });
+    </script>
+</body>
+</html>
