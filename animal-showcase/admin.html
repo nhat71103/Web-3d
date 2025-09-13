@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Quản Lý Động Vật 3D</title>
     <style>
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -1688,6 +1699,63 @@
             }
         }
 
+        // Show message function
+        function showMessage(message, type = 'info') {
+            // Tạo hoặc tìm message container
+            let messageContainer = document.getElementById('messageContainer');
+            if (!messageContainer) {
+                messageContainer = document.createElement('div');
+                messageContainer.id = 'messageContainer';
+                messageContainer.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 9999;
+                    max-width: 400px;
+                `;
+                document.body.appendChild(messageContainer);
+            }
+            
+            // Tạo message element
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+                padding: 12px 20px;
+                margin: 5px 0;
+                border-radius: 6px;
+                color: white;
+                font-weight: bold;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            // Set màu theo type
+            switch(type) {
+                case 'success':
+                    messageDiv.style.backgroundColor = '#4caf50';
+                    break;
+                case 'error':
+                    messageDiv.style.backgroundColor = '#f44336';
+                    break;
+                case 'warning':
+                    messageDiv.style.backgroundColor = '#ff9800';
+                    break;
+                case 'info':
+                default:
+                    messageDiv.style.backgroundColor = '#2196f3';
+                    break;
+            }
+            
+            messageDiv.textContent = message;
+            messageContainer.appendChild(messageDiv);
+            
+            // Auto remove sau 5 giây
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 5000);
+        }
+
         // Load 3D models status
         async function load3DModelsStatus() {
             try {
@@ -1696,12 +1764,15 @@
                 const response = await fetch('animals_api_simple.php');
                 const result = await response.json();
                 
+                console.log('API Response:', result); // Debug log
+                
                 if (!result.success) {
                     showMessage('Lỗi khi tải danh sách động vật: ' + result.error, 'error');
                     return;
                 }
                 
                 const animals = result.data;
+                console.log('Animals data:', animals); // Debug log
                 
                 // Lưu animals data để sử dụng trong view3DModel
                 window.currentAnimals = animals;
@@ -1717,10 +1788,15 @@
         // Display 3D models status
         function display3DModelsStatus(animals) {
             const container = document.getElementById('models3DStatus');
+            console.log('Container found:', container); // Debug log
+            console.log('Animals count:', animals.length); // Debug log
             
             const animalsWith3D = animals.filter(animal => animal.models && animal.models.length > 0);
             const animalsCompleted = animals.filter(animal => animal.models && animal.models.length > 0);
             const animalsNoModel = animals.filter(animal => !animal.models || animal.models.length === 0);
+            
+            console.log('Animals with 3D:', animalsWith3D.length); // Debug log
+            console.log('Animals no model:', animalsNoModel.length); // Debug log
             
             let html = `
                 <div style="margin-bottom: 20px;">
@@ -1776,7 +1852,15 @@
                 </div>
             `;
             
-            container.innerHTML = html;
+            console.log('Generated HTML length:', html.length); // Debug log
+            console.log('Setting innerHTML...'); // Debug log
+            
+            if (container) {
+                container.innerHTML = html;
+                console.log('HTML set successfully!'); // Debug log
+            } else {
+                console.error('Container not found!'); // Debug log
+            }
         }
 
         // View 3D model

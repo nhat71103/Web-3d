@@ -19,15 +19,15 @@ const HomePage = ({ animals, selectedAnimal, setSelectedAnimal, searchTerm, setS
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+        <div className="relative max-w-7xl mx-auto px-4 py-20 sm:px-6 lg:px-8">
           <div className="text-center text-white z-10 animate-fade-in-up">
-            <h2 className="text-5xl font-bold mb-4 animate-gradient-text">
+            <h2 className="text-5xl font-bold mb-6 animate-gradient-text">
               Khám Phá Thế Giới Động Vật 3D
             </h2>
             <p className="text-xl text-white/80 mb-4 animate-fade-in-delay-1">
               Hành trình tuyệt vời qua vương quốc thiên nhiên
             </p>
-            <p className="text-white/60 animate-fade-in-delay-2">
+            <p className="text-lg text-white/60 animate-fade-in-delay-2">
               Với các model 3D được tạo sẵn từ admin
             </p>
           </div>
