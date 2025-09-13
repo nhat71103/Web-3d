@@ -73,6 +73,12 @@ try {
             $media_items = explode(';;', $animal['media_data']);
             foreach ($media_items as $item) {
                 list($file_url, $media_type, $is_primary) = explode('||', $item);
+                
+                // Chuyển đổi đường dẫn tương đối thành đường dẫn qua serve_media.php
+                if (!empty($file_url) && strpos($file_url, 'http') !== 0) {
+                    $file_url = 'http://localhost/3d_web/animal-showcase/api/serve_media.php?file=' . urlencode($file_url);
+                }
+                
                 $animal['media'][] = [
                     'file_url' => $file_url,
                     'media_type' => $media_type,

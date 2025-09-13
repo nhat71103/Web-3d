@@ -53,18 +53,30 @@ try {
         
         // Thêm image nếu có
         if (!empty($animal['image_path'])) {
+            $image_url = $animal['image_path'];
+            // Chuyển đổi đường dẫn tương đối thành đường dẫn qua serve_media.php
+            if (strpos($image_url, 'http') !== 0) {
+                $image_url = 'http://localhost/3d_web/animal-showcase/api/serve_media.php?file=' . urlencode($image_url);
+            }
+            
             $animal['images'][] = [
                 'path' => $animal['image_path'],
-                'url' => $animal['image_path'],
+                'url' => $image_url,
                 'is_primary' => true
             ];
         }
         
         // Thêm 3D model nếu có
         if (!empty($animal['model_path'])) {
+            $model_url = $animal['meshy_model_url'] ?: $animal['model_path'];
+            // Chuyển đổi đường dẫn tương đối thành đường dẫn qua serve_media.php
+            if (strpos($model_url, 'http') !== 0) {
+                $model_url = 'http://localhost/3d_web/animal-showcase/api/serve_media.php?file=' . urlencode($model_url);
+            }
+            
             $animal['models'][] = [
                 'path' => $animal['model_path'],
-                'url' => $animal['meshy_model_url'] ?: $animal['model_path'],
+                'url' => $model_url,
                 'is_primary' => true,
                 'file_size' => $animal['model_file_size'],
                 'status' => $animal['status_3d']

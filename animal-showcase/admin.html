@@ -1020,11 +1020,8 @@
                     <button type="button" class="btn btn-info" onclick="load3DModelsStatus()">
                         🔄 Tải trạng thái 3D
                     </button>
-                    <button type="button" class="btn btn-success" onclick="openAutoImportModal()">
-                        🎮 Tự động thêm model 3D
-                    </button>
-                    <button type="button" class="btn btn-primary" onclick="autoMapMedia()">
-                        🖼️ Tự động thêm hình ảnh con vật
+                    <button type="button" class="btn btn-warning" onclick="openAutoImportAllModal()" style="background: linear-gradient(45deg, #ff9800, #f57c00); color: white;">
+                        🚀 Auto Import All Media
                     </button>
                 </div>
                 
@@ -1123,6 +1120,54 @@
                         <button type="button" class="btn btn-warning" onclick="closeEditModal()">❌ Hủy</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- Modal Auto Import All Media -->
+        <div id="autoImportAllModal" class="modal" style="display: none;">
+            <div class="modal-content" style="max-width: 800px;">
+                <div class="modal-header">
+                    <h3>🎯 Auto Import All Media</h3>
+                    <span class="close" onclick="closeAutoImportAllModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p style="margin-bottom: 20px; color: #666;">
+                        Tự động import cả <strong>hình ảnh</strong> và <strong>model 3D</strong> dựa trên tên động vật
+                    </p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3;">
+                            <h4 style="margin: 0 0 10px 0; color: #1976d2;">🖼️ Hình ảnh</h4>
+                            <p style="margin: 0; font-size: 14px; color: #666;">
+                                Từ folder <code>uploads/images/</code><br>
+                                Format: PNG, JPG, JPEG
+                            </p>
+                        </div>
+                        <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #9c27b0;">
+                            <h4 style="margin: 0 0 10px 0; color: #7b1fa2;">🎯 Model 3D</h4>
+                            <p style="margin: 0; font-size: 14px; color: #666;">
+                                Từ folder <code>uploads/models/</code><br>
+                                Format: GLB
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="btn-group" style="margin-bottom: 20px;">
+                        <button type="button" class="btn btn-success" onclick="mapImagesToAnimals()" style="background: linear-gradient(45deg, #4caf50, #45a049);">
+                            🖼️ Map Hình Ảnh
+                        </button>
+                        <button type="button" class="btn btn-info" onclick="mapModelsToAnimals()" style="background: linear-gradient(45deg, #2196f3, #1976d2);">
+                            🎯 Map Model 3D
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="mapAllMedia()" style="background: linear-gradient(45deg, #ff9800, #f57c00);">
+                            🚀 Map Tất Cả
+                        </button>
+                    </div>
+                    
+                    <div id="autoImportAllResult" style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 15px; display: none; max-height: 400px; overflow-y: auto;">
+                        <!-- Kết quả import sẽ hiển thị ở đây -->
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1765,28 +1810,28 @@
             }
         }
 
-        // Auto Import Modal functions
-        function openAutoImportModal() {
-            document.getElementById('autoImportModal').style.display = 'block';
+        // Auto Import All Media Modal functions
+        function openAutoImportAllModal() {
+            document.getElementById('autoImportAllModal').style.display = 'block';
         }
 
-        function closeAutoImportModal() {
-            document.getElementById('autoImportModal').style.display = 'none';
-            document.getElementById('autoImportResult').style.display = 'none';
+        function closeAutoImportAllModal() {
+            document.getElementById('autoImportAllModal').style.display = 'none';
+            document.getElementById('autoImportAllResult').style.display = 'none';
         }
 
-        // Scan and import models
-        async function scanAndImportModels() {
-            const resultDiv = document.getElementById('autoImportResult');
+        // Import all media (images + models)
+        async function importAllMedia() {
+            const resultDiv = document.getElementById('autoImportAllResult');
             resultDiv.style.display = 'block';
-            resultDiv.innerHTML = '⏳ Đang quét và import models...';
+            resultDiv.innerHTML = '⏳ Đang import tất cả media...';
             resultDiv.style.background = '#e3f2fd';
             
             try {
                 const formData = new FormData();
-                formData.append('action', 'scan');
+                formData.append('action', 'import_all');
                 
-                const response = await fetch('auto_import_3d_models_simple.php', {
+                const response = await fetch('auto_import_all_media.php', {
                     method: 'POST',
                     body: formData
                 });
@@ -1794,7 +1839,23 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    resultDiv.innerHTML = `✅ ${data.message}<br><br>Chi tiết:<br><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    let html = `✅ ${data.message}<br><br>`;
+                    html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;">`;
+                    html += `<div style="background: #e8f5e8; padding: 10px; border-radius: 5px;">`;
+                    html += `<strong>🖼️ Hình ảnh:</strong><br>`;
+                    html += `✅ Imported: ${data.imported_images}<br>`;
+                    html += `⏭️ Skipped: ${data.skipped_images}<br>`;
+                    html += `❌ Errors: ${data.error_images}`;
+                    html += `</div>`;
+                    html += `<div style="background: #f3e5f5; padding: 10px; border-radius: 5px;">`;
+                    html += `<strong>🎯 Model 3D:</strong><br>`;
+                    html += `✅ Imported: ${data.imported_models}<br>`;
+                    html += `⏭️ Skipped: ${data.skipped_models}<br>`;
+                    html += `❌ Errors: ${data.error_models}`;
+                    html += `</div></div>`;
+                    html += `<details><summary>📋 Chi tiết</summary><pre style="white-space: pre-wrap; font-size: 12px;">${data.details.join('\n')}</pre></details>`;
+                    
+                    resultDiv.innerHTML = html;
                     resultDiv.style.background = '#e8f5e8';
                     
                     // Reload data
@@ -1811,18 +1872,18 @@
             }
         }
 
-        // List models in folder
-        async function listModelsInFolder() {
-            const resultDiv = document.getElementById('autoImportResult');
+        // Import images only
+        async function importImagesOnly() {
+            const resultDiv = document.getElementById('autoImportAllResult');
             resultDiv.style.display = 'block';
-            resultDiv.innerHTML = '⏳ Đang tải danh sách models...';
+            resultDiv.innerHTML = '⏳ Đang import hình ảnh...';
             resultDiv.style.background = '#e3f2fd';
             
             try {
                 const formData = new FormData();
-                formData.append('action', 'list');
+                formData.append('action', 'import_images');
                 
-                const response = await fetch('auto_import_3d_models_simple.php', {
+                const response = await fetch('auto_import_all_media.php', {
                     method: 'POST',
                     body: formData
                 });
@@ -1830,25 +1891,14 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    let html = `📋 Danh sách models trong folder:<br><br>`;
-                    
-                    if (data.models && data.models.length > 0) {
-                        data.models.forEach(model => {
-                            html += `
-                                <div style="background: white; padding: 10px; border-radius: 5px; margin: 5px 0; border-left: 3px solid #4caf50;">
-                                    <strong>${model.file_name}</strong><br>
-                                    Kích thước: ${(model.file_size / 1024 / 1024).toFixed(2)} MB<br>
-                                    Format: ${model.extension.toUpperCase()}<br>
-                                    Gợi ý: ${model.suggested_animal || 'Không thể nhận diện'}
-                                </div>
-                            `;
-                        });
-                    } else {
-                        html += '<p>Không có model nào trong folder</p>';
-                    }
+                    let html = `✅ ${data.message}<br><br>`;
+                    html += `<details><summary>📋 Chi tiết</summary><pre style="white-space: pre-wrap; font-size: 12px;">${data.details.join('\n')}</pre></details>`;
                     
                     resultDiv.innerHTML = html;
                     resultDiv.style.background = '#e8f5e8';
+                    
+                    // Reload data
+                    loadStats();
                 } else {
                     resultDiv.innerHTML = `❌ Lỗi: ${data.error}`;
                     resultDiv.style.background = '#ffebee';
@@ -1860,158 +1910,194 @@
             }
         }
 
-        // Process all models
-        async function processAllModels() {
+        // Import models only
+        async function importModelsOnly() {
+            const resultDiv = document.getElementById('autoImportAllResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '⏳ Đang import model 3D...';
+            resultDiv.style.background = '#e3f2fd';
+            
             try {
-                showMessage('Đang xử lý tất cả models...', 'info');
+                const formData = new FormData();
+                formData.append('action', 'import_models');
                 
-                const response = await fetch(API_BASE + 'process-all-models', {
-                    method: 'POST'
+                const response = await fetch('auto_import_all_media.php', {
+                    method: 'POST',
+                    body: formData
                 });
                 
-                const result = await response.json();
-                
-                if (result.success) {
-                    showMessage(`Xử lý thành công! Đã xử lý ${result.processed} models.`, 'success');
-                    loadStats();
-                    loadAnimalsList();
-                } else {
-                    showMessage('Lỗi: ' + (result.error || 'Không thể xử lý models'), 'error');
-                }
-            } catch (error) {
-                console.error('Error processing models:', error);
-                showMessage('Lỗi khi xử lý models', 'error');
-            }
-        }
-        
-        // Process specific model
-        async function processModel(animalId) {
-            try {
-                showMessage('Đang xử lý model...', 'info');
-                
-                const response = await fetch(API_BASE + 'process-model/' + animalId, {
-                    method: 'POST'
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showMessage('Model đã được xử lý thành công!', 'success');
-                    loadStats();
-                    loadAnimalsList();
-                } else {
-                    showMessage('Lỗi: ' + (result.error || 'Không thể xử lý model'), 'error');
-                }
-            } catch (error) {
-                console.error('Error processing model:', error);
-                showMessage('Lỗi khi xử lý model', 'error');
-            }
-        }
-        
-        // Auto Map Media
-        async function autoMapMedia() {
-            if (!confirm('Bạn có muốn tự động map tất cả media (ảnh và 3D models) với động vật không?\n\nĐiều này sẽ:\n- Xóa tất cả media cũ\n- Tự động map ảnh và 3D models dựa trên tên file\n- Cập nhật database mới')) {
-                return;
-            }
-
-            try {
-                showMessage('🔄 Đang tự động map media...', 'info');
-                
-                // Gọi API map media trực tiếp
-                const response = await fetch('map_media_simple.php');
                 const data = await response.json();
                 
                 if (data.success) {
-                    showMessage(`✅ ${data.message}\n\nĐã map: ${data.mapped_animals} động vật\nTổng ảnh: ${data.total_images}\nTổng models: ${data.total_models}`, 'success');
+                    let html = `✅ ${data.message}<br><br>`;
+                    html += `<details><summary>📋 Chi tiết</summary><pre style="white-space: pre-wrap; font-size: 12px;">${data.details.join('\n')}</pre></details>`;
+                    
+                    resultDiv.innerHTML = html;
+                    resultDiv.style.background = '#e8f5e8';
                     
                     // Reload data
                     loadStats();
-                    loadAnimalsList();
+                    load3DModelsStatus();
                 } else {
-                    showMessage('❌ Lỗi: ' + (data.error || 'Không thể map media'), 'error');
+                    resultDiv.innerHTML = `❌ Lỗi: ${data.error}`;
+                    resultDiv.style.background = '#ffebee';
                 }
                 
             } catch (error) {
-                console.error('Error auto mapping media:', error);
-                showMessage('❌ Lỗi khi tự động map media: ' + error.message, 'error');
+                resultDiv.innerHTML = `❌ Lỗi kết nối: ${error.message}`;
+                resultDiv.style.background = '#ffebee';
             }
         }
 
-        // Export animals data
-        function exportAnimalsData() {
-            if (!animalsList || animalsList.length === 0) {
-                showMessage('Không có dữ liệu để xuất', 'error');
-                return;
-            }
+        // Map hình ảnh từ thư mục vào database
+        async function mapImagesToAnimals() {
+            const resultDiv = document.getElementById('autoImportAllResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '⏳ Đang map hình ảnh...';
+            resultDiv.style.background = '#e3f2fd';
             
-            const csvContent = generateCSV(animalsList);
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `animals_data_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // Generate CSV content
-        function generateCSV(animals) {
-            const headers = ['ID', 'Tên', 'Tên tiếng Anh', 'Mô tả', 'Trạng thái 3D', 'Ngày tạo'];
-            const rows = animals.map(animal => [
-                animal.id,
-                animal.name,
-                animal.species,
-                animal.description || '',
-                getStatusDisplayName(animal.status_3d),
-                formatDate(animal.created_at)
-            ]);
-            
-            return [headers, ...rows].map(row => 
-                row.map(field => `"${field}"`).join(',')
-            ).join('\n');
-        }
-
-        // Show message
-        function showMessage(message, type = 'success') {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
-            messageDiv.textContent = message;
-            
-            document.body.appendChild(messageDiv);
-            
-            setTimeout(() => {
-                messageDiv.remove();
-            }, 5000);
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('editModal');
-            if (event.target === modal) {
-                closeEditModal();
+            try {
+                const formData = new FormData();
+                formData.append('action', 'map_images');
+                
+                const response = await fetch('simple_map_media.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = `✅ ${data.message}<br><br>`;
+                    html += `<div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 10px 0;">`;
+                    html += `<h4 style="margin: 0 0 10px 0; color: #2e7d32;">🖼️ Map Hình Ảnh</h4>`;
+                    html += `<strong>Mapped:</strong> ${data.mapped_count} hình ảnh<br>`;
+                    html += `<strong>Skipped:</strong> ${data.skipped_count} con vật không có hình<br>`;
+                    html += `<strong>Method:</strong> Lấy file từ uploads/images/ → gán vào con vật có tên trùng → cập nhật database`;
+                    html += `</div>`;
+                    
+                    if (data.details && data.details.length > 0) {
+                        html += `<details><summary>📋 Chi tiết từng con vật</summary><pre style="white-space: pre-wrap; font-size: 12px;">${data.details.join('\n')}</pre></details>`;
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                    resultDiv.style.background = '#e8f5e8';
+                    
+                    // Reload data
+                    loadStats();
+                    load3DModelsStatus();
+                } else {
+                    resultDiv.innerHTML = `❌ Lỗi: ${data.error}`;
+                    resultDiv.style.background = '#ffebee';
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Lỗi kết nối: ${error.message}`;
+                resultDiv.style.background = '#ffebee';
             }
         }
 
-        // Auto-refresh data every 30 seconds
-        setInterval(() => {
-            loadStats();
-        }, 30000);
+        // Map model 3D từ thư mục vào database
+        async function mapModelsToAnimals() {
+            const resultDiv = document.getElementById('autoImportAllResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '⏳ Đang map model 3D...';
+            resultDiv.style.background = '#e3f2fd';
+            
+            try {
+                const formData = new FormData();
+                formData.append('action', 'map_models');
+                
+                const response = await fetch('simple_map_media.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = `✅ ${data.message}<br><br>`;
+                    html += `<div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 10px 0;">`;
+                    html += `<h4 style="margin: 0 0 10px 0; color: #2e7d32;">🎯 Map Model 3D</h4>`;
+                    html += `<strong>Mapped:</strong> ${data.mapped_count} model 3D<br>`;
+                    html += `<strong>Skipped:</strong> ${data.skipped_count} con vật không có model<br>`;
+                    html += `<strong>Method:</strong> Lấy file từ uploads/models/ → gán vào con vật có tên trùng → cập nhật database`;
+                    html += `</div>`;
+                    
+                    if (data.details && data.details.length > 0) {
+                        html += `<details><summary>📋 Chi tiết từng con vật</summary><pre style="white-space: pre-wrap; font-size: 12px;">${data.details.join('\n')}</pre></details>`;
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                    resultDiv.style.background = '#e8f5e8';
+                    
+                    // Reload data
+                    loadStats();
+                    load3DModelsStatus();
+                } else {
+                    resultDiv.innerHTML = `❌ Lỗi: ${data.error}`;
+                    resultDiv.style.background = '#ffebee';
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Lỗi kết nối: ${error.message}`;
+                resultDiv.style.background = '#ffebee';
+            }
+        }
 
-        // Add keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            // Ctrl/Cmd + R to refresh
-            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
-                e.preventDefault();
-                loadAnimalsList();
-                loadStats();
+        // Map tất cả media (hình ảnh + model 3D)
+        async function mapAllMedia() {
+            const resultDiv = document.getElementById('autoImportAllResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '⏳ Đang map tất cả media...';
+            resultDiv.style.background = '#e3f2fd';
+            
+            try {
+                const formData = new FormData();
+                formData.append('action', 'map_all');
+                
+                const response = await fetch('simple_map_media.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = `✅ ${data.message}<br><br>`;
+                    html += `<div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 10px 0;">`;
+                    html += `<h4 style="margin: 0 0 10px 0; color: #2e7d32;">🚀 Map Tất Cả Media</h4>`;
+                    html += `<strong>Total Mapped:</strong> ${data.total_mapped} files<br>`;
+                    html += `<strong>Total Skipped:</strong> ${data.total_skipped} con vật không có file<br>`;
+                    html += `<strong>Method:</strong> Lấy file từ uploads/images/ và uploads/models/ → gán vào con vật có tên trùng → cập nhật database`;
+                    html += `</div>`;
+                    
+                    if (data.details && data.details.length > 0) {
+                        html += `<details><summary>📋 Chi tiết từng con vật</summary><pre style="white-space: pre-wrap; font-size: 12px;">${data.details.join('\n')}</pre></details>`;
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                    resultDiv.style.background = '#e8f5e8';
+                    
+                    // Reload data
+                    loadStats();
+                    load3DModelsStatus();
+                } else {
+                    resultDiv.innerHTML = `❌ Lỗi: ${data.error}`;
+                    resultDiv.style.background = '#ffebee';
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Lỗi kết nối: ${error.message}`;
+                resultDiv.style.background = '#ffebee';
             }
-            // Escape to close modal
-            if (e.key === 'Escape') {
-                closeEditModal();
-            }
-        });
+        }
+
+
+
+
+
+
     </script>
 </body>
-</html> 
+</html>

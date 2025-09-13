@@ -65,15 +65,21 @@ try {
         $animal['models'] = [];
         
         foreach ($media as $item) {
+            // Chuyển đổi đường dẫn tương đối thành đường dẫn qua serve_media.php
+            $file_url = $item['file_url'];
+            if (!empty($file_url) && strpos($file_url, 'http') !== 0) {
+                $file_url = 'http://localhost/3d_web/animal-showcase/api/serve_media.php?file=' . urlencode($file_url);
+            }
+            
             if ($item['media_type'] === 'image') {
                 $animal['images'][] = [
-                    'url' => $item['file_url'],
+                    'url' => $file_url,
                     'path' => $item['file_path'],
                     'is_primary' => (bool)$item['is_primary']
                 ];
             } elseif ($item['media_type'] === '3d_model') {
                 $animal['models'][] = [
-                    'url' => $item['file_url'],
+                    'url' => $file_url,
                     'path' => $item['file_path'],
                     'is_primary' => (bool)$item['is_primary']
                 ];
